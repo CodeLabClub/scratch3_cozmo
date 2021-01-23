@@ -5,13 +5,14 @@ const AdapterBaseClient = require('../scratch3_eim/codelab_adapter_base.js');
 const ScratchUIHelper = require("../scratch3_eim/scratch_ui_helper.js");
 
 // todo: ['mystery', 'happy', 'winner', 'sad', 'surprised', 'dog', 'cat', 'sneeze', 'excited', 'bored'],
-
-const blockIconURI = require('./icon.svg');
+// https://base64.guru/converter/encode/image/svg
+const blockIconURI = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI0LjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IuWbvuWxgl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgNDAgNDAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQwIDQwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+Cgkuc3Qwe2ZpbGw6IzQ0NDg0Qzt9Cgkuc3Qxe2ZpbGw6I0YyRjJGMjt9Cgkuc3Qye2ZpbGw6IzI5QUJFMjt9Cjwvc3R5bGU+Cjx0aXRsZT7mianlsZXmj5Lku7bphY3lm77orr7orqE8L3RpdGxlPgo8ZyBpZD0iXzcuX0Nvem1vIj4KCTxnPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMS43OSw2LjYyaDE2LjQ5YzMuNTMsMCw2LjQ5LDIuODcsNi40OSw2LjQ5djE1LjgzYzAsMi41NC0yLjA1LDQuNTEtNC41MSw0LjUxbDAsMEg5LjgzCgkJCWMtMi41NCwwLTQuNTEtMi4wNS00LjUxLTQuNTFsMCwwVjEzLjE4QzUuMzEsOS40OSw4LjE5LDYuNjIsMTEuNzksNi42MnoiLz4KCQk8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMzAuMjYsMzQuNjlIOS44M2MtMy4yLDAtNS44My0yLjYzLTUuODMtNS44M1YxMy4xOGMwLTQuMjYsMy40NS03Ljg3LDcuNzEtNy44N2gxNi41OAoJCQljNC4yNiwwLDcuNzEsMy40NSw3LjcxLDcuNzF2MTUuODNDMzYuMDksMzEuOTgsMzMuMzgsMzQuNjksMzAuMjYsMzQuNjl6IE0xMS43OSw3Ljg2Yy0yLjg3LDAtNS4xNywyLjM4LTUuMTcsNS4zNHYxNS42NwoJCQljMCwxLjg5LDEuMzksMy4yOSwzLjI5LDMuMjloMjAuMzVjMS44OSwwLDMuMjktMS4zOSwzLjI5LTMuMjlWMTMuMDJjMC0yLjg3LTIuMy01LjE3LTUuMTctNS4xN0MyOC4zOCw3Ljg2LDExLjc5LDcuODYsMTEuNzksNy44NgoJCQl6Ii8+Cgk8L2c+Cgk8Zz4KCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMTQuNDIsMTIuNDVoMi4wNWMwLjk5LDAsMS44OSwwLjksMS44OSwxLjg5djIuMzhjMCwwLjk5LTAuOSwxLjg5LTEuODksMS44OWgtMi4wNQoJCQljLTAuOTksMC0xLjg5LTAuOS0xLjg5LTEuODl2LTIuMzhDMTIuNTQsMTMuMjcsMTMuMjcsMTIuNDUsMTQuNDIsMTIuNDV6Ii8+Cgk8L2c+Cgk8Zz4KCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNMjMuNzgsMTIuNDVoMi4wNWMwLjk5LDAsMS44OSwwLjksMS44OSwxLjg5djMuNjljMCwwLjk5LTAuOSwxLjg5LTEuODksMS44OWgtMi4wNQoJCQljLTAuOTksMC0xLjg5LTAuOS0xLjg5LTEuODl2LTMuNjlDMjEuODksMTMuMjcsMjIuNzksMTIuNDUsMjMuNzgsMTIuNDV6Ii8+Cgk8L2c+CjwvZz4KPC9zdmc+Cg==';
 const menuIconURI = blockIconURI;
 
 const SCRATCH_EXT_ID = 'cozmo';
 const NODE_NAME = `node_${SCRATCH_EXT_ID}`;
 const NODE_ID = `eim/${NODE_NAME}`;
+const NODE_MIN_VERSION = "2.0.0";
 const HELP_URL = `https://adapter.codelab.club/extension_guide/${SCRATCH_EXT_ID}/`;
 
 // 翻译
@@ -96,6 +97,7 @@ class AdapterClient {
       SCRATCH_EXT_ID,
       NODE_NAME,
       NODE_ID,
+      NODE_MIN_VERSION,
       runtime,
       this.adapter_base_client,
       list_timeout
