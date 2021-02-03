@@ -16,15 +16,77 @@ const NODE_MIN_VERSION = "2.0.0";
 const HELP_URL = `https://adapter.codelab.club/extension_guide/${SCRATCH_EXT_ID}/`;
 
 // 翻译
-const FormHeadAngle = {
-  en: 'head_angle',
-  'zh-cn': '头部的俯仰角'
+const FormHelp = {
+	en: "help",
+	"zh-cn": "帮助",
 };
 
 const FormReset = {
   en: "reset",
   "zh-cn": "重置",
 };
+
+const FormHeadAngle = {
+  en: 'head_angle',
+  'zh-cn': '头部的俯仰角'
+};
+
+const FormSetHeadAngle = {
+  en: 'set head angle to [x] degrees',
+  'zh-cn': '将头部的俯仰角设置为[x]°'
+};
+
+const FormSetLiftHeight = {
+  en: 'set lift height to [x]',
+  'zh-cn': '将手臂高度设置为[x]'
+};
+
+const FormSetRobotVolume = {
+  en: 'set robot volume to [x]',
+  'zh-cn': '将音量设置为[x]'
+};
+
+const FormPose = {
+  en: 'Robot Pose [x_y_z]',
+  'zh-cn': 'Robot Pose [x_y_z]'
+};
+
+const FormWorld = {
+  en: 'Robot World',
+  'zh-cn': 'Robot World'
+};
+
+const FormCube = {
+  en: 'Cube [cube_n]',
+  'zh-cn': '方块 [cube_n]'
+};
+
+const FormGoToObject = {
+  en: 'go to cube [cube_n] distance [distance]',
+  'zh-cn': '前往方块 [cube_n] 距离 [distance]'
+};
+
+const Form_dock_with_cube = {
+  en: 'dock with cube [cube_n] distance [distance]',
+  'zh-cn': '驶入方块 [cube_n] 方位角 [distance]'
+};
+
+
+const FormGoToPose = {
+  en: 'go to pose x[x]mm y[y]mm angle[angle_z]°',
+  'zh-cn': '前往位置 x[x]mm y[y]mm angle_z[angle_z]°'
+};
+
+const Form_freeplay_behaviors = {
+  en: '[turn] freeplay behaviors',
+  'zh-cn': '[turn] 自由探索模式'
+};
+
+const Form_facial_expression_estimation = {
+  en: '[turn] facial expression estimation',
+  'zh-cn': '[turn] 表情识别'
+};
+
 
 const FormWhenFaceSeen = {
   en: 'when face [face_expression] [face_action] seen',
@@ -33,7 +95,7 @@ const FormWhenFaceSeen = {
 
 const FormWhenCube = {
   en: 'when cube [object_id] [object_action]',
-  'zh-cn': '当魔方 [object_id] [object_action]'
+  'zh-cn': '当方块 [object_id] [object_action]'
 };
 
 const FormWhenPet = {
@@ -67,8 +129,12 @@ class AdapterClient {
   notify_callback(msg) {
     // 使用通知机制直到自己退出
     // todo 重置
-    if (msg.message === `${this.NODE_ID} stopped`) {
+    console.log("notify_callback ->", msg)
+    if (msg.message === `停止 ${this.NODE_ID}`) {
         this.ScratchUIHelper.reset();
+    }
+    if (msg.message === `${this.NODE_ID} 已断开`) {
+      this.ScratchUIHelper.reset();
     }
   }
 
@@ -83,8 +149,8 @@ class AdapterClient {
       null, // onMessage,
       this.onAdapterPluginMessage.bind(this), // onAdapterPluginMessage,
       null, // update_nodes_status,
+      null, // node_statu_change_callback,
       this.notify_callback.bind(this),
-      null,
       //this.notify_callback.bind(this),
       null, // error_message_callback,
       null, // update_adapter_status
@@ -198,11 +264,7 @@ class Scratch3CozmoBlocks {
         {
           opcode: 'open_help_url',
           blockType: BlockType.COMMAND,
-          text: formatMessage({
-            id: 'cozmo.open_help_url',
-            default: 'help',
-            description: 'open help url'
-          }),
+          text: FormHelp[the_locale],
           arguments: {}
         },
         {
@@ -221,6 +283,7 @@ class Scratch3CozmoBlocks {
           blockType: BlockType.COMMAND,
           text: FormReset[the_locale],
         },
+        "---",
         {
           opcode: 'say',
           blockType: BlockType.COMMAND,
@@ -281,10 +344,147 @@ class Scratch3CozmoBlocks {
           }
         },
         {
+          opcode: 'set_head_angle', // 表情
+          blockType: BlockType.COMMAND,
+          text: FormSetHeadAngle[the_locale],
+          arguments: {
+            x: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 0 // -22.5 - 44.5
+            }
+          }
+        },
+        {
           opcode: 'get_head_angle', // 表情
           blockType: BlockType.REPORTER,
           text: FormHeadAngle[the_locale],
           arguments: {}
+        },
+        {
+          opcode: 'set_lift_height', // 表情
+          blockType: BlockType.COMMAND,
+          text: FormSetLiftHeight[the_locale],
+          arguments: {
+            x: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 0.2 // 0-1
+            }
+          }
+        },
+        {
+          opcode: 'set_robot_volume',
+          blockType: BlockType.COMMAND,
+          text: FormSetRobotVolume[the_locale],
+          arguments: {
+            x: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 0.8 // 0-1
+            }
+          }
+        },
+        '---',
+        {
+          opcode: 'get_pose', // 表情
+          blockType: BlockType.REPORTER,
+          text: FormPose[the_locale],
+          arguments: {
+            x_y_z: {
+              type: ArgumentType.STRING,
+              defaultValue: 'x', // 0-1
+              menu: 'x_y_z'
+            }
+            
+          }
+        },
+        /*{
+          opcode: 'get_world', // 表情
+          blockType: BlockType.REPORTER,
+          text: FormWorld[the_locale],
+          arguments: {
+            x_y_z: {
+              type: ArgumentType.STRING,
+              defaultValue: 'x', // 0-1
+              menu: 'x_y_z'
+            }
+            
+          }
+        },*/
+        {
+          opcode: 'get_cube', // 表情
+          blockType: BlockType.REPORTER,
+          text: FormCube[the_locale],
+          arguments: {
+            cube_n: {
+              type: ArgumentType.STRING,
+              defaultValue: '1',
+              menu: 'cube_n'
+            }
+          }
+        },
+        {
+          opcode: 'go_to_object', // 表情
+          blockType: BlockType.COMMAND,
+          text: FormGoToObject[the_locale],
+          arguments: {
+            cube_n: {
+              type: ArgumentType.STRING,
+              defaultValue: '1',
+              menu: 'cube_n'
+            },
+            distance: {
+              type: ArgumentType.STRING,
+              defaultValue: '100',
+            },
+          }
+        },
+        {
+          opcode: 'dock_with_cube', // 表情
+          blockType: BlockType.COMMAND,
+          text: Form_dock_with_cube[the_locale],
+          arguments: {
+            cube_n: {
+              type: ArgumentType.STRING,
+              defaultValue: '1',
+              menu: 'cube_n'
+            },
+            distance: {
+              type: ArgumentType.STRING,
+              defaultValue: '0',
+            },
+          }
+        },
+        //
+        {
+          opcode: 'go_to_pose', // 表情
+          blockType: BlockType.COMMAND,
+          text: FormGoToPose[the_locale],
+          arguments: {
+            x: {
+              type: ArgumentType.STRING,
+              defaultValue: '100',
+            },
+            y: {
+              type: ArgumentType.STRING,
+              defaultValue: '0',
+            },
+            angle_z:{
+              type: ArgumentType.STRING,
+              defaultValue: '0',
+            },
+          }
+        },
+        '---',
+        {
+          opcode: 'freeplay_behaviors',
+          blockType: BlockType.COMMAND,
+          text: Form_freeplay_behaviors[the_locale],
+          arguments: {
+            turn: {
+              type: ArgumentType.STRING,
+              defaultValue: 'start',
+              menu: 'turn'
+            }
+          }
         },
         {
           opcode: 'play_animation',
@@ -334,6 +534,19 @@ class Scratch3CozmoBlocks {
               type: ArgumentType.STRING,
               defaultValue: 'tapped',
               menu: 'object_action'
+            }
+          }
+        },
+        // robot.enable_facial_expression_estimation(enable=True)
+        {
+          opcode: 'facial_expression_estimation',
+          blockType: BlockType.COMMAND,
+          text: Form_facial_expression_estimation[the_locale],
+          arguments: {
+            turn: {
+              type: ArgumentType.STRING,
+              defaultValue: 'start',
+              menu: 'turn'
             }
           }
         },
@@ -422,7 +635,7 @@ class Scratch3CozmoBlocks {
           blockType: BlockType.COMMAND,
           text: formatMessage({
             id: 'cozmo.python_exec',
-            default: 'exec [CODE]',
+            default: 'eval [CODE]',
             description: 'run python code.'
           }),
 
@@ -438,14 +651,14 @@ class Scratch3CozmoBlocks {
           blockType: BlockType.REPORTER,
           text: formatMessage({
             id: 'cozmo.python_exec_repoter',
-            default: 'exec [CODE]',
+            default: 'eval [CODE]',
             description: 'run python code.'
           }),
 
           arguments: {
             CODE: {
               type: ArgumentType.STRING,
-              defaultValue: 'robot.lift_height.distance_mm'
+              defaultValue: 'robot.world.get_light_cube(1)' // robot.world
             }
           }
         },
@@ -507,7 +720,7 @@ class Scratch3CozmoBlocks {
           'disappeared',
           'moved'
         ], // map with adapter
-        face_action: ['appeared', 'disappeared'],
+        face_action: ['appeared', 'disappeared', "observed"],
         pet_action: ['appeared', 'disappeared'],
         pet_type: ['any', 'dog', 'cat'],
         face_expression: [
@@ -517,6 +730,16 @@ class Scratch3CozmoBlocks {
           'surprised',
           'angry',
           'neutral'
+        ],
+        x_y_z: [
+          'x',
+          'y',
+          'z'
+        ],
+        cube_n:[
+          '1',
+          '2',
+          '3'
         ]
       }
     };
@@ -635,11 +858,20 @@ class Scratch3CozmoBlocks {
         return this.adapter_client.isTargetEvent(event_name, event_param);
     }
 
+    facial_expression_estimation(args) {
+      let _map = {
+        "start": "True",
+        "stop": "False"
+      }
+      let content = `robot.enable_facial_expression_estimation(enable=${_map[args.turn]})`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
+    }
+
     whenFaceAction(args) {
         let _event_type = "Face";
         let action_map = {
             appeared: `${_event_type}Appeared`,
-            // observed: `${_event_type}Observed`,
+            observed: `${_event_type}Observed`,
             disappeared: `${_event_type}Disappeared`,
         };
         let face_action = args.face_action; //"ObjectTapped";
@@ -683,11 +915,68 @@ class Scratch3CozmoBlocks {
         return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
     }
 
+    set_head_angle(args) {
+      let content = `robot.set_head_angle(cozmo.util.degrees(${args.x})).wait_for_completed()`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
+    }
+
+    set_lift_height(args) {
+      let content = `robot.set_lift_height(${args.x}).wait_for_completed()`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
+    }
+
+    set_robot_volume(args) {
+      let content = `robot.set_robot_volume(${args.x})`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
+    }
+
+    get_pose(args){
+      let x_y_z = args.x_y_z;
+      let content = `robot.pose.position.${x_y_z}`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
+    }
+    
+    get_world(args){
+      let x_y_z = args.x_y_z;
+      let content = `robot.world`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
+    }
+
+    get_cube(args){
+      let content = `robot.world.get_light_cube(${args.cube_n})`; // 
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
+    }
+
+    go_to_object(args){
+      // let x_y_z = args.x_y_z;
+      let content = `robot.go_to_object(robot.world.get_light_cube(${args.cube_n}), cozmo.util.distance_mm(${args.distance})).wait_for_completed()`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
+    }
+
+    dock_with_cube(args){
+      // let x_y_z = args.x_y_z;
+      // robot.dock_with_cube(cube, approach_angle=cozmo.util.degrees(180), num_retries=2)
+      let content = `robot.dock_with_cube(robot.world.get_light_cube(${args.cube_n}), approach_angle=cozmo.util.degrees(${args.distance}), num_retries=2).wait_for_completed()`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, content, this.emit_timeout);
+    }
+
+    go_to_pose(args){
+      //robot.go_to_pose(Pose(100, 100, 0, angle_z=degrees(45)), relative_to_robot=True).wait_for_completed()
+      let code = `robot.go_to_pose(cozmo.util.Pose(${args.x}, ${args.y}, 0, angle_z=cozmo.util.degrees(${args.angle_z})), relative_to_robot=True).wait_for_completed()`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, code, this.emit_timeout);
+    }
+
+    freeplay_behaviors(args){
+      //robot.go_to_pose(Pose(100, 100, 0, angle_z=degrees(45)), relative_to_robot=True).wait_for_completed()
+      let code = `robot.${args.turn}_freeplay_behaviors()`;
+      return this.adapter_client.adapter_base_client.emit_with_messageid(NODE_ID, code, this.emit_timeout);
+    }
+
     control_node(args) {
       // ui是由结束通知完成的
       const content = "stop";
       const node_name = NODE_NAME;
-      return this.client.adapter_base_client.emit_with_messageid_for_control(
+      return this.adapter_client.adapter_base_client.emit_with_messageid_for_control(
           NODE_ID,
           content,
           node_name,
